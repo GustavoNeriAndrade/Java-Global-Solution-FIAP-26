@@ -9,6 +9,7 @@ import br.com.fiap.bean.Satelite;
 
 import javax.swing.JOptionPane;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class Main {
 
@@ -18,160 +19,318 @@ public class Main {
                 "Bem-vindo ao EcoLoop!\nSistema de Monitoramento de Desmatamento e Emissões de Carbono.",
                 "EcoLoop", JOptionPane.INFORMATION_MESSAGE);
 
-        // INSTANCIAÇÃO: Regiao
-        String nomeRegiao = JOptionPane.showInputDialog(null,
-                "CADASTRO DE REGIÃO\nNome da região:", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+        boolean executando = true;
 
-        String bioma = JOptionPane.showInputDialog(null,
-                "Bioma da região:", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+        while (executando) {
 
-        String estado = JOptionPane.showInputDialog(null,
-                "Estado da região (sigla):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+            String[] opcoes = {"Cadastrar Região", "Cadastrar Satélite", "Registrar Coleta",
+                    "Cadastrar Analista", "Registrar Alerta", "Sair"};
 
-        double latitude = Double.parseDouble(JOptionPane.showInputDialog(null,
-                "Latitude da região (ex: -3.10):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+            int escolha = JOptionPane.showOptionDialog(null,
+                    "O que deseja fazer?",
+                    "EcoLoop — Menu Principal",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, opcoes, opcoes[0]);
 
-        double longitude = Double.parseDouble(JOptionPane.showInputDialog(null,
-                "Longitude da região (ex: -60.02):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+            // Usuário fechou a janela ou clicou Sair
+            if (escolha == 5 || escolha == JOptionPane.CLOSED_OPTION) {
+                executando = false;
+                continue;
+            }
 
-        double areaTotalKm2 = Double.parseDouble(JOptionPane.showInputDialog(null,
-                "Área total da região em km²:", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+            switch (escolha) {
 
-        Regiao regiao = new Regiao(1, nomeRegiao, bioma, estado, latitude, longitude, areaTotalKm2);
+                // CADASTRO DE REGIÃO
+                case 0: {
+                    boolean sucesso = false;
+                    while (!sucesso) {
+                        try {
+                            String input = JOptionPane.showInputDialog(null,
+                                    "CADASTRO DE REGIÃO\n\n" +
+                                            "Preencha os dados separados por vírgula:\n" +
+                                            "Nome, Bioma, Estado (sigla), Latitude, Longitude, Área total (km²)\n\n",
+                                    "EcoLoop - Região", JOptionPane.QUESTION_MESSAGE);
 
-        JOptionPane.showMessageDialog(null,
-                "Região cadastrada com sucesso!", "EcoLoop - Região", JOptionPane.INFORMATION_MESSAGE);
+                            if (input == null) break;
 
-        // INSTANCIAÇÃO: Satelite
-        String nomeSatelite = JOptionPane.showInputDialog(null,
-                "CADASTRO DE SATÉLITE\nNome do satélite:", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            String[] dados = input.split(",");
+                            if (dados.length != 6)
+                                throw new IllegalArgumentException("Informe exatamente 6 campos separados por vírgula.");
 
-        String agencia = JOptionPane.showInputDialog(null,
-                "Agência operadora (ex: NASA, ESA, INPE):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            String nomeRegiao   = dados[0].trim();
+                            String bioma        = dados[1].trim();
+                            String estado       = dados[2].trim();
+                            double latitude     = Double.parseDouble(dados[3].trim());
+                            double longitude    = Double.parseDouble(dados[4].trim());
+                            double areaTotalKm2 = Double.parseDouble(dados[5].trim());
 
-        double altitude = Double.parseDouble(JOptionPane.showInputDialog(null,
-                "Altitude orbital em km (ex: 705.50):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+                            Regiao regiao = new Regiao(1, nomeRegiao, bioma, estado, latitude, longitude, areaTotalKm2);
 
-        LocalDate dataLancamento = LocalDate.parse(JOptionPane.showInputDialog(null,
-                "Data de lançamento (AAAA-MM-DD):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+                            JOptionPane.showMessageDialog(null,
+                                    "Região cadastrada com sucesso!\n\n",
+                                    "EcoLoop - Região", JOptionPane.INFORMATION_MESSAGE);
 
-        Satelite satelite = new Satelite(1, nomeSatelite, agencia, altitude, dataLancamento);
+                            sucesso = true;
 
-        JOptionPane.showMessageDialog(null,
-                "Satélite cadastrado com sucesso!",
-                "EcoLoop - Satélite", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: Latitude, Longitude e Área devem ser números válidos.\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        } catch (IllegalArgumentException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: " + e.getMessage() + "\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    break;
+                }
 
-        // INSTANCIAÇÃO: Coleta
-        LocalDate dataColeta = LocalDate.parse(JOptionPane.showInputDialog(null,
-                "REGISTRO DE COLETA\nData da coleta (AAAA-MM-DD):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+                // CADASTRO DE SATÉLITE
+                case 1: {
+                    boolean sucesso = false;
+                    while (!sucesso) {
+                        try {
+                            String input = JOptionPane.showInputDialog(null,
+                                    "CADASTRO DE SATÉLITE\n\n" +
+                                            "Preencha os dados separados por vírgula:\n" +
+                                            "Nome, Agência, Altitude (km), Data de lançamento (AAAA-MM-DD)\n\n" +
+                                            "Exemplo: Landsat 8, NASA, 705.00, 2013-02-11",
+                                    "EcoLoop - Satélite", JOptionPane.QUESTION_MESSAGE);
 
-        String horaColeta = JOptionPane.showInputDialog(null,
-                "Hora da coleta (HH:MM:SS):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            if (input == null) break;
 
-        String tipoDado = JOptionPane.showInputDialog(null,
-                "Tipo de dado coletado (ex: Imagem Óptica, Radar):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            String[] dados = input.split(",");
+                            if (dados.length != 4)
+                                throw new IllegalArgumentException("Informe exatamente 4 campos separados por vírgula.");
 
-        Coleta coleta = new Coleta(1, dataColeta, horaColeta, tipoDado, "Processado", regiao, satelite);
+                            String nomeSatelite = dados[0].trim();
+                            String agencia      = dados[1].trim();
+                            double altitude     = Double.parseDouble(dados[2].trim());
+                            LocalDate dataLanc  = LocalDate.parse(dados[3].trim());
 
-        JOptionPane.showMessageDialog(null,
-                "Coleta registrada com sucesso!",
-                "EcoLoop - Coleta", JOptionPane.INFORMATION_MESSAGE);
+                            Satelite satelite = new Satelite(1, nomeSatelite, agencia, altitude, dataLanc);
 
-        // INSTANCIAÇÃO: Analista
-        String nomeAnalista = JOptionPane.showInputDialog(null,
-                "CADASTRO DE ANALISTA\nNome do analista:", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            JOptionPane.showMessageDialog(null,
+                                    "Satélite cadastrado com sucesso!\n\n",
+                                    "EcoLoop - Satélite", JOptionPane.INFORMATION_MESSAGE);
 
-        String emailAnalista = JOptionPane.showInputDialog(null,
-                "E-mail do analista:", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                            sucesso = true;
 
-        String orgao = JOptionPane.showInputDialog(null,
-                "Órgão vinculado (ex: IBAMA, INPE):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: A altitude deve ser um número válido.\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        } catch (DateTimeParseException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: Data inválida. Use o formato AAAA-MM-DD.\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        } catch (IllegalArgumentException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: " + e.getMessage() + "\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    break;
+                }
 
-        String nivelAcesso = JOptionPane.showInputDialog(null,
-                "Nível de acesso (ex: Administrador, Operador):", "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                // REGISTRO DE COLETA
+                case 2: {
+                    boolean sucesso = false;
+                    while (!sucesso) {
+                        try {
+                            String input = JOptionPane.showInputDialog(null,
+                                    "REGISTRO DE COLETA\n\n" +
+                                            "Preencha os dados separados por vírgula:\n" +
+                                            "Data (AAAA-MM-DD), Hora (HH:MM:SS), Tipo de dado\n\n" +
+                                            "Exemplo: 2026-05-20, 08:30:00, Imagem Óptica",
+                                    "EcoLoop - Coleta", JOptionPane.QUESTION_MESSAGE);
 
-        Analista analista = new Analista(1, nomeAnalista, emailAnalista, orgao, nivelAcesso);
+                            if (input == null) break;
 
-        JOptionPane.showMessageDialog(null,
-                "Analista cadastrado com sucesso!",
-                "EcoLoop - Analista", JOptionPane.INFORMATION_MESSAGE);
+                            String[] dados = input.split(",");
+                            if (dados.length != 3)
+                                throw new IllegalArgumentException("Informe exatamente 3 campos separados por vírgula.");
 
-        // INSTANCIAÇÃO: Alerta
-        double areaDesmatada = Double.parseDouble(JOptionPane.showInputDialog(null,
-                "REGISTRO DE ALERTA\nÁrea desmatada em hectares (ex: 350.50):", "EcoLoop", JOptionPane.QUESTION_MESSAGE));
+                            LocalDate dataColeta = LocalDate.parse(dados[0].trim());
+                            String horaColeta    = dados[1].trim();
+                            String tipoDado      = dados[2].trim();
 
-        Alerta alerta = new Alerta(1, areaDesmatada, "Pendente", LocalDate.now(), analista, coleta);
+                            // Objetos fixos para demonstração
+                            Regiao regiao = new Regiao(1, "Amazônia Sul", "Amazônia", "AM",
+                                    -3.10, -60.02, 4196943.00);
+                            Satelite satelite = new Satelite(1, "Landsat 8", "NASA",
+                                    705.00, LocalDate.parse("2013-02-11"));
 
-        JOptionPane.showMessageDialog(null,
-                "Alerta registrado com sucesso!",
-                "EcoLoop - Alerta", JOptionPane.INFORMATION_MESSAGE);
+                            Coleta coleta = new Coleta(1, dataColeta, horaColeta, tipoDado,
+                                    "Processado", regiao, satelite);
 
-        //classificarSeveridade
-        String severidade = alerta.classificarSeveridade();
+                            JOptionPane.showMessageDialog(null,
+                                    "Coleta registrada com sucesso!\n\n",
+                                    "EcoLoop - Coleta", JOptionPane.INFORMATION_MESSAGE);
 
-        JOptionPane.showMessageDialog(null,
-                "RESULTADO: CLASSIFICAÇÃO DE SEVERIDADE\n\n" +
-                        "Área desmatada      : " + areaDesmatada + " ha\n" +
-                        "Nível de severidade : " + severidade,
-                "EcoLoop - Severidade", JOptionPane.INFORMATION_MESSAGE);
+                            sucesso = true;
 
-        //confirmarAlerta
-        String metodologia = JOptionPane.showInputDialog(null,
-                "CONFIRMAÇÃO DE ALERTA\nMetodologia de cálculo de carbono (ex: IPCC, SEEG):",
-                "EcoLoop", JOptionPane.QUESTION_MESSAGE);
+                        } catch (DateTimeParseException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: Data inválida. Use o formato AAAA-MM-DD.\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        } catch (IllegalArgumentException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: " + e.getMessage() + "\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    break;
+                }
 
-        RelatorioCarbono relatorio = alerta.confirmarAlerta(1, metodologia);
+                // CADASTRO DE ANALISTA
+                case 3: {
+                    boolean sucesso = false;
+                    while (!sucesso) {
+                        try {
+                            String input = JOptionPane.showInputDialog(null,
+                                    "CADASTRO DE ANALISTA\n\n" +
+                                            "Preencha os dados separados por vírgula:\n" +
+                                            "Nome, E-mail, Órgão, Nível de acesso\n\n" +
+                                            "Exemplo: João Silva, joao@ibama.gov.br, IBAMA, Administrador",
+                                    "EcoLoop - Analista", JOptionPane.QUESTION_MESSAGE);
 
-        if (relatorio != null) {
-            JOptionPane.showMessageDialog(null,
-                    "Alerta #" + alerta.getIdAlerta() + " confirmado com sucesso!\n" +
-                            "Relatório de carbono gerado automaticamente.\n\n" +
-                            relatorio.toString(),
-                    "EcoLoop - Alerta Confirmado", JOptionPane.INFORMATION_MESSAGE);
+                            if (input == null) break;
+
+                            String[] dados = input.split(",");
+                            if (dados.length != 4)
+                                throw new IllegalArgumentException("Informe exatamente 4 campos separados por vírgula.");
+
+                            String nomeAnalista = dados[0].trim();
+                            String email        = dados[1].trim();
+                            String orgao        = dados[2].trim();
+                            String nivelAcesso  = dados[3].trim();
+
+                            Analista analista = new Analista(1, nomeAnalista, email, orgao, nivelAcesso);
+
+                            JOptionPane.showMessageDialog(null,
+                                    "Analista cadastrado com sucesso!\n\n",
+                                    "EcoLoop - Analista", JOptionPane.INFORMATION_MESSAGE);
+
+                            sucesso = true;
+
+                        } catch (IllegalArgumentException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: " + e.getMessage() + "\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    break;
+                }
+
+                // REGISTRO DE ALERTA + MÉTODOS FUNCIONAIS
+                case 4: {
+                    boolean sucesso = false;
+                    while (!sucesso) {
+                        try {
+                            String input = JOptionPane.showInputDialog(null,
+                                    "REGISTRO DE ALERTA\n\n" +
+                                            "Preencha os dados separados por vírgula:\n" +
+                                            "Área desmatada (ha), Metodologia de carbono\n\n" +
+                                            "Exemplo: 350.50, IPCC",
+                                    "EcoLoop - Alerta", JOptionPane.QUESTION_MESSAGE);
+
+                            if (input == null) break;
+
+                            String[] dados = input.split(",");
+                            if (dados.length != 2)
+                                throw new IllegalArgumentException("Informe exatamente 2 campos separados por vírgula.");
+
+                            double areaDesmatada = Double.parseDouble(dados[0].trim());
+                            String metodologia   = dados[1].trim();
+
+                            if (areaDesmatada <= 0)
+                                throw new IllegalArgumentException("A área desmatada deve ser maior que zero.");
+
+                            // Objetos fixos para demonstração
+                            Regiao regiao = new Regiao(1, "Amazônia Sul", "Amazônia", "AM",
+                                    -3.10, -60.02, 4196943.00);
+                            Satelite satelite = new Satelite(1, "Landsat 8", "NASA",
+                                    705.00, LocalDate.parse("2013-02-11"));
+                            Coleta coleta = new Coleta(1, LocalDate.now(), "08:00:00",
+                                    "Imagem Óptica", "Processado", regiao, satelite);
+                            Analista analista = new Analista(1, "João Silva",
+                                    "joao@ibama.gov.br", "IBAMA", "Administrador");
+
+                            Alerta alerta = new Alerta(1, areaDesmatada, "Pendente",
+                                    LocalDate.now(), analista, coleta);
+
+                            // classificarSeveridade
+                            JOptionPane.showMessageDialog(null,
+                                    "RESULTADO: CLASSIFICAÇÃO DE SEVERIDADE\n\n" +
+                                            "Área desmatada      : " + String.format("%.2f", areaDesmatada) + " ha\n" +
+                                            "Nível de severidade : " + alerta.classificarSeveridade(),
+                                    "EcoLoop - Severidade", JOptionPane.INFORMATION_MESSAGE);
+
+                            // confirmarAlerta
+                            RelatorioCarbono relatorio = alerta.confirmarAlerta(1, metodologia);
+
+                            if (relatorio != null) {
+
+                                // calcularCarbono
+                                double co2 = relatorio.calcularCarbono();
+
+                                JOptionPane.showMessageDialog(null,
+                                        "RESULTADO: CÁLCULO DE CO2\n\n" +
+                                                "Fator utilizado : 200 ton de CO2 por hectare\n" +
+                                                "Área desmatada  : " + String.format("%.2f", areaDesmatada) + " ha\n" +
+                                                "CO2 estimado    : " + String.format("%.2f", co2) + " toneladas métricas",
+                                        "EcoLoop - Cálculo de CO2", JOptionPane.INFORMATION_MESSAGE);
+
+                                // exibirResumoRelatorio
+                                JOptionPane.showMessageDialog(null,
+                                        "RELATÓRIO DE CARBONO - EcoLoop\n\n" +
+                                                "Relatório ID    : " + relatorio.getIdRelatorio() + "\n" +
+                                                "Data de Geração : " + relatorio.getDataGeracao() + "\n" +
+                                                "Metodologia     : " + relatorio.getMetodologia() + "\n" +
+                                                "----------------------------------------\n" +
+                                                "Alerta ID       : " + alerta.getIdAlerta() + "\n" +
+                                                "Status Alerta   : " + alerta.getStatusAlerta() + "\n" +
+                                                "Área Desmatada  : " + String.format("%.2f", alerta.getAreaDesmatadaHa()) + " ha\n" +
+                                                "Severidade      : " + alerta.getNivelSeveridade() + "\n" +
+                                                "Região          : " + coleta.getRegiao().getNomeRegiao() + "\n" +
+                                                "Bioma           : " + coleta.getRegiao().getBiomaRegiao() + "\n" +
+                                                "Estado          : " + coleta.getRegiao().getEstadoRegiao() + "\n" +
+                                                "Analista        : " + analista.getNomeAnalista() + "\n" +
+                                                "Órgão           : " + analista.getOrgaoVinculado() + "\n" +
+                                                "----------------------------------------\n" +
+                                                "CO2 Estimado    : " + String.format("%.2f", relatorio.getCo2EstimadoTonelada()) + " toneladas métricas",
+                                        "EcoLoop - Resumo do Relatório", JOptionPane.INFORMATION_MESSAGE);
+
+                                // TESTE: confirmar alerta já confirmado
+                                RelatorioCarbono tentativa = alerta.confirmarAlerta(2, metodologia);
+
+                                JOptionPane.showMessageDialog(null,
+                                        "TESTE: Tentativa de confirmar alerta já confirmado\n\n" +
+                                                "Status atual : " + alerta.getStatusAlerta() + "\n" +
+                                                "Resultado    : " + (tentativa == null
+                                                ? "Bloqueado — alerta já está Confirmado."
+                                                : "Novo relatório gerado."),
+                                        "EcoLoop - Teste", JOptionPane.WARNING_MESSAGE);
+                            }
+
+                            sucesso = true;
+
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: A área desmatada deve ser um número válido.\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        } catch (IllegalArgumentException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro: " + e.getMessage() + "\nTente novamente.",
+                                    "EcoLoop - Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    break;
+                }
+            }
         }
-
-        //calcularCarbono
-        if (relatorio != null) {
-            double co2 = relatorio.calcularCarbono();
-
-            JOptionPane.showMessageDialog(null,
-                    "RESULTADO: CÁLCULO DE CO2\n\n" +
-                            "Fator utilizado : 200 ton de CO2 por hectare (floresta tropical)\n" +
-                            "Área desmatada  : " + String.format("%.2f", areaDesmatada) + " ha\n" +
-                            "CO2 estimado    : " + String.format("%.2f", co2) + " toneladas métricas",
-                    "EcoLoop - Cálculo de CO2", JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        //exibirResumoRelatorio
-        if (relatorio != null) {
-            JOptionPane.showMessageDialog(null,
-                    "RELATÓRIO DE CARBONO - EcoLoop\n\n" +
-                            "Relatório ID    : " + relatorio.getIdRelatorio() + "\n" +
-                            "Data de Geração : " + relatorio.getDataGeracao() + "\n" +
-                            "Metodologia     : " + relatorio.getMetodologia() + "\n" +
-                            "----------------------------------------\n" +
-                            "Alerta ID       : " + alerta.getIdAlerta() + "\n" +
-                            "Status Alerta   : " + alerta.getStatusAlerta() + "\n" +
-                            "Área Desmatada  : " + String.format("%.2f", alerta.getAreaDesmatadaHa()) + " ha\n" +
-                            "Severidade      : " + alerta.getNivelSeveridade() + "\n" +
-                            "Região          : " + coleta.getRegiao().getNomeRegiao() + "\n" +
-                            "Bioma           : " + coleta.getRegiao().getBiomaRegiao() + "\n" +
-                            "Estado          : " + coleta.getRegiao().getEstadoRegiao() + "\n" +
-                            "Analista        : " + analista.getNomeAnalista() + "\n" +
-                            "Órgão           : " + analista.getOrgaoVinculado() + "\n" +
-                            "----------------------------------------\n" +
-                            "CO2 Estimado    : " + String.format("%.2f", relatorio.getCo2EstimadoTonelada()) + " toneladas métricas",
-                    "EcoLoop - Resumo do Relatório", JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        // teste: tentar confirmar o mesmo alerta novamente
-        RelatorioCarbono tentativa = alerta.confirmarAlerta(2, metodologia);
-
-        JOptionPane.showMessageDialog(null,
-                "TESTE: Tentativa de confirmar alerta já confirmado\n\n" +
-                        "Status atual do alerta : " + alerta.getStatusAlerta() + "\n" +
-                        "Resultado              : " + (tentativa == null ? "Bloqueado — alerta já está Confirmado." : "Novo relatório gerado."),
-                "EcoLoop - Teste", JOptionPane.WARNING_MESSAGE);
 
         JOptionPane.showMessageDialog(null,
                 "Programa encerrado.\nObrigado por usar o EcoLoop!",
